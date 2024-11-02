@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,51 +34,37 @@ class _SwipeTestPageState extends State<SwipeTestPage> {
   final List<String> numbers = ['1', '2', '3', '4', '5'];
   final List<String> letters = ['A', 'B', 'C', 'D', 'E'];
 
-  // ドラッグ開始位置を保存
-  Offset? dragStartPosition;
+  void _handleSwipe(DragEndDetails details) {
+    final velocity = details.velocity;
+    const minVelocity = 100.0; // スワイプを検知する最小速度（低めに設定）
 
-  void _handleDragStart(DragStartDetails details) {
-    dragStartPosition = details.globalPosition;
-  }
-
-  void _handleDragUpdate(DragUpdateDetails details) {
-    if (dragStartPosition == null) return;
-
-    final dragDistance = details.globalPosition - dragStartPosition!;
-    const minDistance = 20.0; // スワイプを検知する最小距離
-
-    // 水平方向の移動が垂直方向より大きい場合
-    if (dragDistance.dx.abs() > dragDistance.dy.abs()) {
-      if (dragDistance.dx.abs() > minDistance) {
+    if (velocity.pixelsPerSecond.dx.abs() > velocity.pixelsPerSecond.dy.abs()) {
+      // 水平方向のスワイプ
+      if (velocity.pixelsPerSecond.dx.abs() > minVelocity) {
         setState(() {
-          if (dragDistance.dx > 0) {
+          if (velocity.pixelsPerSecond.dx > 0) {
             // 右スワイプ
             horizontalIndex = (horizontalIndex + 1) % 5;
           } else {
             // 左スワイプ
             horizontalIndex = (horizontalIndex - 1 + 5) % 5;
           }
-          dragStartPosition = details.globalPosition;
         });
       }
-    } 
-    // 垂直方向の移動が水平方向より大きい場合
-    else if (dragDistance.dy.abs() > minDistance) {
-      setState(() {
-        if (dragDistance.dy > 0) {
-          // 下スワイプ
-          verticalIndex = (verticalIndex + 1) % 5;
-        } else {
-          // 上スワイプ
-          verticalIndex = (verticalIndex - 1 + 5) % 5;
-        }
-        dragStartPosition = details.globalPosition;
-      });
+    } else {
+      // 垂直方向のスワイプ
+      if (velocity.pixelsPerSecond.dy.abs() > minVelocity) {
+        setState(() {
+          if (velocity.pixelsPerSecond.dy > 0) {
+            // 下スワイプ
+            verticalIndex = (verticalIndex + 1) % 5;
+          } else {
+            // 上スワイプ
+            verticalIndex = (verticalIndex - 1 + 5) % 5;
+          }
+        });
+      }
     }
-  }
-
-  void _handleDragEnd(DragEndDetails details) {
-    dragStartPosition = null;
   }
 
   @override
@@ -86,35 +73,61 @@ class _SwipeTestPageState extends State<SwipeTestPage> {
       appBar: AppBar(
         title: const Text('Swipe Test'),
       ),
-      body: Center(
-        child: MouseRegion(
-          cursor: SystemMouseCursors.move,
-          child: GestureDetector(
-            onPanStart: _handleDragStart,
-            onPanUpdate: _handleDragUpdate,
-            onPanEnd: _handleDragEnd,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.blue),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '${numbers[horizontalIndex]}${letters[verticalIndex]}',
-                      style: const TextStyle(fontSize: 48),
+      body: RawKeyboardListener(
+        focusNode: FocusNode(),
+        autofocus: true,
+        onKey: (RawKeyEvent event) {
+          if (event is RawKeyDownEvent) {
+            if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+              setState(() {
+                horizontalIndex = (horizontalIndex + 1) % 5;
+              });
+            } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+              setState(() {
+                horizontalIndex = (horizontalIndex - 1 + 5) % 5;
+              });
+            } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+              setState(() {
+                verticalIndex = (verticalIndex + 1) % 5;
+              });
+            } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+              setState(() {
+                verticalIndex = (verticalIndex - 1 + 5) % 5;
+              });
+            }
+          }
+        },
+        child: GestureDetector(
+          onHorizontalDragEnd: _handleSwipe,
+          onVerticalDragEnd: _handleSwipe,
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: Colors.transparent,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blue),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'ドラッグして値を変更',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    child: Center(
+                      child: Text(
+                        '${numbers[horizontalIndex]}${letters[verticalIndex]}',
+                        style: const TextStyle(fontSize: 48),
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'スワイプ または ← → ↑ ↓',
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
               ),
             ),
           ),
