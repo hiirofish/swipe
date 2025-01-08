@@ -1,16 +1,60 @@
-# swipe
+# Swipe Test App
 
-A new Flutter project.
+A simple Flutter application demonstrating smooth swipe gestures and keyboard navigation. The app shows a grid of numbers and letters that can be navigated through swipes or arrow keys.
+
+## Features
+
+- Responsive swipe detection with improved gesture handling
+- Keyboard arrow key support
+- Debug logging for gesture analysis
+- Smooth transitions between states
+- Cross-platform support (Web, Android, iOS)
+
+## Controls
+
+- **Horizontal Swipe** / **Left/Right Arrow Keys**: Change numbers (1-5)
+- **Vertical Swipe** / **Up/Down Arrow Keys**: Change letters (A-E)
+
+## Technical Details
+
+The app includes several optimizations for better user experience:
+- Adjusted minimum velocity threshold for more sensitive swipe detection
+- Recovery handling for quick successive gestures
+- Detailed debug logging for gesture analysis
+- Performance monitoring for gesture success rate
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+1. Make sure you have Flutter installed on your machine
+2. Clone this repository
+3. Run the following commands:
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter pub get
+flutter run
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+For web deployment:
+```bash
+flutter build web
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Debug Features
+
+When running in debug mode, the app provides detailed logging about gesture detection:
+- Gesture velocity and direction
+- Success/failure rate of gesture detection
+- Timing analysis for successive gestures
+
+## Dependencies
+
+- Flutter SDK
+- No additional packages required
+
+## Contributing
+
+Feel free to submit issues and enhancement requests!
+
+## License
+
+This project is open source and available under the MIT License.
